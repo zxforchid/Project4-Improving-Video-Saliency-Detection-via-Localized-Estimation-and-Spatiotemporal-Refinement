@@ -1,0 +1,26 @@
+function [initSals] = obtainInitSal3(frame_names,saliencyMapPath,frames,video_data)
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% 获取初始显著性图2, 单模型提升
+% 注意：原始 sal 的后缀是 .png
+% 2017.03.10 16::42PM
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+% 获取彩色图像后缀名  
+colorImgList = dir(video_data);
+suffix_color = colorImgList(5).name(end-3:end);clear colorImgList
+files = dir(fullfile(saliencyMapPath, strcat('*', '.png')));   
+initSals = cell(1,length(files));
+for f = 1:length(files)
+     frame_names = files(f).name;
+     tmpInitSal = imread([saliencyMapPath,frame_names]);
+     tmpInitSal = normalizeSal(tmpInitSal);
+
+     im = imread([video_data,frame_names(1:end-4),suffix_color]);
+     tmpInitSal = graphCut_Refine(im,tmpInitSal); 
+     tmpInitSal = normalizeSal(tmpInitSal);
+    
+     initSals{1,f} = tmpInitSal;
+     clear tmpInitSal
+end
+clear frame_names saliencyMapPath frames
+
+end
